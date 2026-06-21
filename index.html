@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="提词器">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23000'/%3E%3Ctext x='96' y='128' text-anchor='middle' fill='%23fff' font-size='120' font-family='system-ui'%3E📃%3C/text%3E%3C/svg%3E">
+<title>提词器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== App Shell ===== -->
+<div id="app">
+
+  <!-- ─── Editor Mode ─── -->
+  <div id="editor-view" class="view active">
+    <header class="editor-header">
+      <h1 class="app-title">提词器</h1>
+      <div class="header-script-info" id="header-script-info">
+        <span class="current-script-name" id="current-script-name">文稿</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="btn-manage" aria-label="文稿管理">☰</button>
+        <button class="btn-icon" id="btn-help" aria-label="使用帮助">?</button>
+      </div>
+    </header>
+
+    <div class="editor-body">
+      <!-- Text Area -->
+      <textarea id="editor-textarea" placeholder="在此粘贴或输入你的文稿…" spellcheck="false"></textarea>
+
+      <!-- Quick Settings -->
+      <div class="editor-settings">
+        <div class="setting-row">
+          <label class="setting-label">滚动速度</label>
+          <div class="speed-control">
+            <button class="btn-speed" data-speed="20">慢</button>
+            <button class="btn-speed active" data-speed="40">中</button>
+            <button class="btn-speed" data-speed="60">快</button>
+            <input type="range" id="speed-slider" class="speed-slider" min="5" max="100" value="40">
+          </div>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">字体大小</label>
+          <div class="font-control">
+            <button class="btn-font" data-size="24">小</button>
+            <button class="btn-font active" data-size="36">中</button>
+            <button class="btn-font" data-size="56">大</button>
+            <span class="font-value" id="font-value-editor">36px</span>
+          </div>
+          <div class="font-slider-row">
+            <input type="range" id="font-slider" class="font-slider" min="14" max="80" value="36">
+          </div>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">字体颜色</label>
+          <div class="color-control">
+            <button class="color-swatch active" data-color="#ffffff" style="background:#ffffff;border-color:#ffffff;"></button>
+            <button class="color-swatch" data-color="#f5e6c8" style="background:#f5e6c8;"></button>
+            <button class="color-swatch" data-color="#a8e6cf" style="background:#a8e6cf;"></button>
+            <button class="color-swatch" data-color="#ffe082" style="background:#ffe082;"></button>
+            <button class="color-swatch" data-color="#80deea" style="background:#80deea;"></button>
+            <label class="color-custom-wrap">
+              <span class="color-custom-label">自定义</span>
+              <input type="color" id="font-color-picker" class="color-picker" value="#ffffff">
+            </label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">选项</label>
+          <div class="toggle-control">
+            <label class="toggle-item">
+              <input type="checkbox" id="chk-mirror">
+              <span class="toggle-label">镜像模式</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="chk-countdown">
+              <span class="toggle-label">启动倒计时</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="chk-hide-controls">
+              <span class="toggle-label">自动隐藏控件</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="editor-footer">
+      <button class="btn-primary" id="btn-start">开始提词</button>
+    </footer>
+  </div>
+
+  <!-- ─── Prompter Mode ─── -->
+  <div id="prompter-view" class="view">
+    <!-- Scrolling Text -->
+    <div class="prompter-viewport" id="prompter-viewport">
+      <div class="prompter-mirror-wrap" id="mirror-wrap">
+        <div class="prompter-text" id="prompter-text"></div>
+      <div class="reading-guide" id="reading-guide"></div>
+      </div>
+    </div>
+
+    <!-- Countdown Overlay -->
+    <div class="countdown-overlay" id="countdown-overlay">
+      <div class="countdown-number" id="countdown-number">3</div>
+    </div>
+
+    <!-- Controls Overlay -->
+    <div class="prompter-controls" id="prompter-controls">
+      <div class="controls-top">
+        <button class="btn-icon control-btn" id="btn-back" aria-label="返回编辑" data-action="back">✕</button>
+        <span class="control-title" id="control-title">文稿</span>
+        <div class="control-spacer"></div>
+        <button class="btn-icon control-btn" id="btn-control-settings" aria-label="设置" data-action="settings">⚙</button>
+      </div>
+      <div class="controls-center">
+        <button class="btn-icon control-btn-lg" id="btn-rewind" aria-label="快退">⏪</button>
+        <button class="btn-icon control-btn-xl" id="btn-play" aria-label="播放/暂停">▶</button>
+        <button class="btn-icon control-btn-lg" id="btn-forward" aria-label="快进">⏩</button>
+      </div>
+      <div class="controls-font-row" id="controls-font-row">
+        <span class="ctrl-label">字号</span>
+        <button class="btn-ctrl-font" data-fsize="24">小</button>
+        <button class="btn-ctrl-font active" data-fsize="36">中</button>
+        <button class="btn-ctrl-font" data-fsize="56">大</button>
+        <input type="range" id="font-slider-prompter" class="font-slider font-slider-sm" min="14" max="80" value="36">
+        <span class="font-value font-value-sm" id="font-value-prompter">36</span>
+        <span class="ctrl-label ctrl-label-color">颜色</span>
+        <button class="color-swatch-sm active" data-color="#ffffff" style="background:#ffffff;border-color:#ffffff;"></button>
+        <button class="color-swatch-sm" data-color="#f5e6c8" style="background:#f5e6c8;"></button>
+        <button class="color-swatch-sm" data-color="#a8e6cf" style="background:#a8e6cf;"></button>
+        <button class="color-swatch-sm" data-color="#ffe082" style="background:#ffe082;"></button>
+        <button class="color-swatch-sm" data-color="#80deea" style="background:#80deea;"></button>
+      </div>
+      <div class="controls-bottom">
+        <div class="speed-row">
+          <span class="speed-label">速度</span>
+          <input type="range" id="prompter-speed-slider" class="speed-slider" min="5" max="100" value="40">
+          <span class="speed-value" id="speed-value">40</span>
+        </div>
+        <div class="progress-row">
+          <input type="range" id="seek-slider" class="seek-slider" min="0" max="1000" value="0">
+          <span class="progress-text" id="progress-text">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gesture hint -->
+    <div class="gesture-hint" id="gesture-hint">轻触显示控件<br>上下滑动调速度</div>
+  </div>
+
+  <!-- ─── Script Management Modal ─── -->
+  <div class="manage-overlay" id="manage-modal">
+    <div class="manage-panel">
+      <div class="manage-panel-header">
+        <h2>文稿管理</h2>
+        <button class="btn-icon manage-close" id="manage-close" aria-label="关闭">✕</button>
+      </div>
+      <div class="manage-list" id="manage-list"></div>
+      <div class="manage-panel-footer">
+        <button class="btn-primary" id="btn-manage-new">+ 新建文稿</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Help Modal ─── -->
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal-content">
+      <button class="btn-icon modal-close" id="help-close" aria-label="关闭">✕</button>
+      <h2>使用说明</h2>
+      <ul>
+        <li><strong>编辑文稿</strong> — 在主界面粘贴或输入你要说的内容</li>
+        <li><strong>多脚本管理</strong> — 可创建多个文稿，左右切换</li>
+        <li><strong>开始提词</strong> — 点击"开始提词"进入全屏滚动模式</li>
+        <li><strong>播放控制</strong> — 点击屏幕显示控件，可暂停/调节速度/快进快退</li>
+        <li><strong>手势操作</strong> — 在提词界面上下滑动可快速调节速度</li>
+        <li><strong>镜像模式</strong> — 开启后文字左右翻转，配合提词器玻璃使用</li>
+        <li><strong>自动保存</strong> — 所有文稿会自动保存在浏览器中</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}</script></body>
+</html>
